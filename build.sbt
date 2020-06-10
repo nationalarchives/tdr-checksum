@@ -27,3 +27,5 @@ assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
+
+assemblyJarName in assembly := "checksum.jar"

@@ -21,7 +21,6 @@ pipeline {
                 script {
                     tdr.reportStartOfBuildToGitHub(repo)
 	            sh "sbt -no-colors assembly"
-		    sh "mv target/scala-2.13/tdr-checksum-assembly-*.jar target/scala-2.13/checksum.jar"
 		    stash includes: "target/scala-2.13/checksum.jar", name: "checksum-jar"
                 }
             }
