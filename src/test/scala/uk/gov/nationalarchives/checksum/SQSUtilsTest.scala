@@ -1,6 +1,6 @@
 package uk.gov.nationalarchives.checksum
 
-import org.mockito.{ArgumentCaptor, MockitoSugar}
+import org.mockito.{ArgumentCaptor, Mockito, MockitoSugar}
 import org.scalatest.flatspec.AnyFlatSpec
 import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.{DeleteMessageRequest, DeleteMessageResponse, SendMessageRequest, SendMessageResponse}
@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers._
 class SQSUtilsTest extends AnyFlatSpec with MockitoSugar {
 
   "The send method" should "be called with the correct parameters" in {
-    val sqsClient = mock[SqsClient]
+    val sqsClient = Mockito.mock(classOf[SqsClient])
     val sqsUtils = SQSUtils(sqsClient)
     val argumentCaptor: ArgumentCaptor[SendMessageRequest] = ArgumentCaptor.forClass(classOf[SendMessageRequest])
     val mockResponse = SendMessageResponse.builder.build
@@ -24,7 +24,7 @@ class SQSUtilsTest extends AnyFlatSpec with MockitoSugar {
   }
 
   "The delete method" should "be called with the correct parameters" in {
-    val sqsClient = mock[SqsClient]
+    val sqsClient = Mockito.mock(classOf[SqsClient])
     val sqsUtils = SQSUtils(sqsClient)
     val argumentCaptor: ArgumentCaptor[DeleteMessageRequest] = ArgumentCaptor.forClass(classOf[DeleteMessageRequest])
     val mockResponse = DeleteMessageResponse.builder.build
