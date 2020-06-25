@@ -61,7 +61,7 @@ class ChecksumCalculator {
       checksumGenerator.map(checksum => {
         print(checksum)
         val keyToArray: Array[String] = s3.getObject.getKey.split("/")
-        val fileId = UUID.fromString(keyToArray(keyToArray.length - 1))
+        val fileId = UUID.fromString(keyToArray.last)
 
         val messageBody = AddFileMetadataInput("SHA256ServerSideChecksum", fileId, checksum).asJson.noSpaces
         sqsUtils.send(configFactory.getString("sqs.queue.output"), messageBody)
