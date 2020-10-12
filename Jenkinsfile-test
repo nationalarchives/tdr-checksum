@@ -82,11 +82,6 @@ pipeline {
             }
         }
     }
-    success {
-      script {
-        tdr.reportSuccessfulBuildToGitHub(repo, env.GIT_COMMIT)
-      }
-    }
   }
 }
 
