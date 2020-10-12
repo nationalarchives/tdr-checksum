@@ -70,17 +70,17 @@ pipeline {
         }
       }
     }
+  }
+  post {
+    failure {
+      script {
+        tdr.reportFailedBuildToGitHub(repo, env.GIT_COMMIT)
+      }
     }
-    post {
-        failure {
-            script {
-                tdr.reportFailedBuildToGitHub(repo, env.GIT_COMMIT)
-            }
-        }
-        success {
-            script {
-                tdr.reportSuccessfulBuildToGitHub(repo, env.GIT_COMMIT)
-            }
-        }
+    success {
+      script {
+        tdr.reportSuccessfulBuildToGitHub(repo, env.GIT_COMMIT)
+      }
     }
   }
+}
