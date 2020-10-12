@@ -6,19 +6,19 @@ ThisBuild / organization := "uk.gov.nationalarchives"
 ThisBuild / organizationName := "checksum-calculator"
 
 libraryDependencies ++= Seq(
-  sqsSdk,
-  s3Sdk,
   lambdaJavaCore,
   lambdaJavaEvents,
+  awsUtils,
   generatedGraphql,
   typesafe,
   circeCore,
   circeGeneric,
   circeParser,
+  catsEffect,
+  scalaLogging,
+  logback,
   scalaTest % Test,
-  sqsMock % Test,
-  s3Mock % Test,
-  mockito % Test
+  sqsMock % Test
 )
 
 resolvers += "TDR Releases" at "s3://tdr-releases-mgmt"
