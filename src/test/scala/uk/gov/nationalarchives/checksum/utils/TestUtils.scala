@@ -1,31 +1,18 @@
 package uk.gov.nationalarchives.checksum.utils
 
-import java.io.File
 import java.net.URI
 import java.util.Base64
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
-import io.findify.s3mock.S3Mock
 import io.findify.sqsmock.SQSService
 import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.{CreateBucketRequest, CreateBucketResponse, DeleteBucketRequest, DeleteBucketResponse, PutObjectRequest, PutObjectResponse}
 import software.amazon.awssdk.services.sqs.SqsClient
-import software.amazon.awssdk.services.sqs.model.{CreateQueueRequest, CreateQueueResponse, DeleteMessageRequest, DeleteMessageResponse, Message, ReceiveMessageRequest, SendMessageRequest, SendMessageResponse}
+import software.amazon.awssdk.services.sqs.model._
 
 import scala.io.Source.fromResource
 import scala.jdk.CollectionConverters._
 object TestUtils {
-
-  def createBucket: CreateBucketResponse = s3Client.createBucket(CreateBucketRequest.builder.bucket("testbucket").build)
-  def deleteBucket(): DeleteBucketResponse = s3Client.deleteBucket(DeleteBucketRequest.builder.bucket("testbucket").build)
-
-  def putFile(location: String): PutObjectResponse = {
-    val path = new File(getClass.getResource(s"/testfiles/$location").getPath).toPath
-    val putObjectRequest = PutObjectRequest.builder.bucket("testbucket").key("consignmentId/acea5919-25a3-4c6b-8908-fa47cc77878f").build
-    s3Client.putObject(putObjectRequest, path)
-  }
 
   def receiptHandle(body: String): String = Base64.getEncoder.encodeToString(body.getBytes("UTF-8"))
 
@@ -73,13 +60,7 @@ object TestUtils {
   val sqsApi = new SQSService(port)
   val inputQueueUrl = s"http://localhost:$port/$account/$inputQueueName"
   val outputQueueUrl = s"http://localhost:$port/$account/$outputQueueName"
-  val s3Api = S3Mock(port = 8003, dir = "/tmp/s3")
 
-  val s3Client: S3Client = S3Client.builder
-    .region(Region.EU_WEST_2)
-    .endpointOverride(URI.create("http://localhost:8003/"))
-    .build()
-
-  val inputQueueHelper = QueueHelper(inputQueueUrl)
-  val outputQueueHelper = QueueHelper(outputQueueUrl)
+  val inputQueueHelper: QueueHelper = QueueHelper(inputQueueUrl)
+  val outputQueueHelper: QueueHelper = QueueHelper(outputQueueUrl)
 }
