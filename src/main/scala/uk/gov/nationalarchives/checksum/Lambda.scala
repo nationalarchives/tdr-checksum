@@ -21,7 +21,6 @@ import scala.language.postfixOps
 
 class Lambda {
 
-
   val config: Config = ConfigFactory.load
   val sqsUtils: SQSUtils = SQSUtils(sqs)
 

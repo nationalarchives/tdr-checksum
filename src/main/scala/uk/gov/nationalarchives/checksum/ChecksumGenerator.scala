@@ -35,5 +35,3 @@ object ChecksumGenerator {
   case class ChecksumFile(consignmentId: UUID, fileId: UUID, originalPath: String)
   def apply(): ChecksumGenerator = new ChecksumGenerator()
 }
-
-

@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.sqs.model._
 
 import scala.io.Source.fromResource
 import scala.jdk.CollectionConverters._
+
 object TestUtils {
 
   def receiptHandle(body: String): String = Base64.getEncoder.encodeToString(body.getBytes("UTF-8"))

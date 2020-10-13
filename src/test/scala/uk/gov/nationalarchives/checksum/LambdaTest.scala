@@ -23,13 +23,13 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "put a message in the output queue if the message is successful " in {
-    new Lambda().process(createEvent("sns_file_event"), null)
+    new Lambda().process(createEvent("sqs_file_event"), null)
     val msgs = outputQueueHelper.receive
     msgs.size should equal(1)
   }
 
   "The update method" should "put one message in the output queue, delete the successful message and leave the key error message" in {
-    Try(new Lambda().process(createEvent("sns_file_event", "sns_file_no_key"), null))
+    Try(new Lambda().process(createEvent("sqs_file_event", "sqs_file_no_key"), null))
     val outputMessages = outputQueueHelper.receive
     val inputMessages = inputQueueHelper.receive
     outputMessages.size should equal(1)
@@ -37,7 +37,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "put one message in the output queue, delete the successful message and leave the decoding error message" in {
-    Try(new Lambda().process(createEvent("sns_file_event", "sns_file_invalid_json"), null))
+    Try(new Lambda().process(createEvent("sqs_file_event", "sqs_file_invalid_json"), null))
     val outputMessages = outputQueueHelper.receive
     val inputMessages = inputQueueHelper.receive
     outputMessages.size should equal(1)
@@ -45,7 +45,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "leave the queues unchanged if there are no successful messages" in {
-    Try(new Lambda().process(createEvent("sns_file_invalid_json"), null))
+    Try(new Lambda().process(createEvent("sqs_file_invalid_json"), null))
     val outputMessages = outputQueueHelper.receive
     val inputMessages = inputQueueHelper.receive
     outputMessages.size should equal(0)
@@ -53,13 +53,13 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "return the receipt handle for a successful message" in {
-    val event = createEvent("sns_file_event")
+    val event = createEvent("sqs_file_event")
     val response = new Lambda().process(event, null)
     response.head should equal(receiptHandle(event.getRecords.get(0).getBody))
   }
 
   "The update method" should "throw an exception for a no key error" in {
-    val event = createEvent("sns_file_no_key")
+    val event = createEvent("sqs_file_no_key")
     val exception = intercept[RuntimeException] {
       new Lambda().process(event, null)
     }
@@ -67,7 +67,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "calculate the correct checksum for a file with one chunk" in {
-    new Lambda().process(createEvent("sns_file_event"), null)
+    new Lambda().process(createEvent("sqs_file_event"), null)
     val msgs = outputQueueHelper.receive
     val metadata: AddFileMetadata = decode[AddFileMetadata](msgs.head.body) match {
       case Right(metadata) => metadata
@@ -77,7 +77,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   "The update method" should "calculate the correct checksum for a file with two chunks" in {
-    new Lambda().process(createEvent("sns_file_event_large_file"), null)
+    new Lambda().process(createEvent("sqs_file_event_large_file"), null)
     val msgs = outputQueueHelper.receive
     val metadata: AddFileMetadata = decode[AddFileMetadata](msgs.head.body) match {
       case Right(metadata) => metadata
