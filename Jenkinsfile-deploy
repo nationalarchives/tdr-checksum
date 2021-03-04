@@ -27,7 +27,9 @@ pipeline {
   post {
     success {
       script {
-        tdr.runEndToEndTests(0, params.STAGE, BUILD_URL)
+        if(params.STAGE != "prod") {
+          tdr.runEndToEndTests(0, params.STAGE, BUILD_URL)
+        }
       }
     }
   }
