@@ -8,13 +8,12 @@ import cats.effect.{IO, Resource}
 import com.typesafe.config.ConfigFactory
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
 
-class ChecksumGenerator {
+class ChecksumGenerator(config: Map[String, String]) {
 
   def generate(checksumFile: ChecksumFile): IO[String] = {
-    val configFactory = ConfigFactory.load
-    val chunkSizeInMB = configFactory.getInt("chunk.size")
+    val chunkSizeInMB = config("chunk.size").toInt
     val chunkSizeInBytes: Int = chunkSizeInMB * 1024 * 1024
-    val filePath = s"""${configFactory.getString("efs.root.location")}/${checksumFile.consignmentId}/${checksumFile.originalPath}"""
+    val filePath = s"""${config("efs.root.location")}/${checksumFile.consignmentId}/${checksumFile.originalPath}"""
     val messageDigester: MessageDigest = MessageDigest.getInstance("SHA-256")
 
     for {
@@ -33,5 +32,5 @@ class ChecksumGenerator {
 
 object ChecksumGenerator {
   case class ChecksumFile(consignmentId: UUID, fileId: UUID, originalPath: String)
-  def apply(): ChecksumGenerator = new ChecksumGenerator()
+  def apply(config: Map[String, String]): ChecksumGenerator = new ChecksumGenerator(config)
 }
