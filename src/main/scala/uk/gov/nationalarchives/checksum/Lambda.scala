@@ -10,8 +10,8 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.parser.decode
 import software.amazon.awssdk.services.sqs.model.{DeleteMessageResponse, SendMessageResponse}
-import uk.gov.nationalarchives.aws.utils.Clients.sqs
-import uk.gov.nationalarchives.aws.utils.SQSUtils
+import uk.gov.nationalarchives.aws.utils.Clients.{kms, sqs}
+import uk.gov.nationalarchives.aws.utils.{KMSUtils, SQSUtils}
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
 import graphql.codegen.types.AddFileMetadataInput
 import com.typesafe.scalalogging.Logger
@@ -21,11 +21,14 @@ import scala.language.postfixOps
 
 class Lambda {
 
-  val config: Config = ConfigFactory.load
+  val configFactory: Config = ConfigFactory.load
   val sqsUtils: SQSUtils = SQSUtils(sqs)
-
-  val deleteMessage: String => DeleteMessageResponse = sqsUtils.delete(config.getString("sqs.queue.input"), _)
-  val sendMessage: String => SendMessageResponse = sqsUtils.send(config.getString("sqs.queue.output"), _)
+  val kmsUtils: KMSUtils = KMSUtils(kms(configFactory.getString("kms.endpoint")), Map("LambdaFunctionName" -> configFactory.getString("function.name")))
+  val lambdaConfig: Map[String, String] = kmsUtils.decryptValuesFromConfig(
+    List("sqs.queue.input", "sqs.queue.output", "efs.root.location", "chunk.size")
+  )
+  val deleteMessage: String => DeleteMessageResponse = sqsUtils.delete(lambdaConfig("sqs.queue.input"), _)
+  val sendMessage: String => SendMessageResponse = sqsUtils.send(lambdaConfig("sqs.queue.output"), _)
 
   val logger: Logger = Logger[Lambda]
 
@@ -41,7 +44,7 @@ class Lambda {
       .map(sqsMessage => {
         for {
           body <- decodeBody(sqsMessage)
-          checksum <- ChecksumGenerator().generate(body.checksumFile)
+          checksum <- ChecksumGenerator(lambdaConfig).generate(body.checksumFile)
           _ <- IO(sendMessage(AddFileMetadataInput("SHA256ServerSideChecksum", body.checksumFile.fileId, checksum).asJson.noSpaces))
         } yield body.receiptHandle
       })

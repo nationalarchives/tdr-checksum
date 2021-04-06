@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   scalaLogging,
   logback,
   scalaTest % Test,
-  sqsMock % Test
+  sqsMock % Test,
+  wiremock % Test
 )
 
 resolvers += "TDR Releases" at "s3://tdr-releases-mgmt"

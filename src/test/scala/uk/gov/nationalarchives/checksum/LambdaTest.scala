@@ -1,5 +1,6 @@
 package uk.gov.nationalarchives.checksum
 
+import com.github.tomakehurst.wiremock.client.WireMock.{post, urlEqualTo}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -15,6 +16,12 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     sqsApi.start()
     outputQueueHelper.createQueue
     inputQueueHelper.createQueue
+    wiremockKmsEndpoint.start()
+    wiremockKmsEndpoint.stubFor(post(urlEqualTo("/")))
+  }
+
+  override def afterAll(): Unit = {
+    wiremockKmsEndpoint.stop()
   }
 
   override def beforeEach(): Unit = {
