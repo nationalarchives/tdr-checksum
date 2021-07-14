@@ -1,7 +1,5 @@
 package uk.gov.nationalarchives.checksum.utils
 
-import java.net.URI
-import java.util.Base64
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
 import com.github.tomakehurst.wiremock.WireMockServer
@@ -10,21 +8,20 @@ import com.github.tomakehurst.wiremock.common.FileSource
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.{Parameters, ResponseDefinitionTransformer}
 import com.github.tomakehurst.wiremock.http.{Request, ResponseDefinition}
-import io.findify.sqsmock.SQSService
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import org.elasticmq.rest.sqs.{SQSRestServer, SQSRestServerBuilder}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model._
 
+import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import scala.io.Source.fromResource
 import scala.jdk.CollectionConverters._
-import io.circe.generic.auto._
-import io.circe.parser.decode
 
 object TestUtils {
-
-  def receiptHandle(body: String): String = Base64.getEncoder.encodeToString(body.getBytes("UTF-8"))
 
   def createEvent(locations: String*): SQSEvent = {
     val event = new SQSEvent()
@@ -33,8 +30,11 @@ object TestUtils {
       val record = new SQSMessage()
       val body = fromResource(s"json/$location.json").mkString
       record.setBody(body)
-      inputQueueHelper.send(body)
-      record.setReceiptHandle(receiptHandle(body))
+      val sendResponse = inputQueueHelper.send(body)
+      val receiptHandle = inputQueueHelper.receive.filter(_.messageId() == sendResponse.messageId()).head.receiptHandle()
+      inputQueueHelper.changeMessageVisibility(receiptHandle)
+      record.setReceiptHandle(receiptHandle)
+
       record
     })
 
@@ -47,6 +47,15 @@ object TestUtils {
       .region(Region.EU_WEST_2)
       .endpointOverride(URI.create("http://localhost:8002"))
       .build()
+
+    def changeMessageVisibility(receiptHandle: String): ChangeMessageVisibilityResponse = {
+      sqsClient.changeMessageVisibility(
+        ChangeMessageVisibilityRequest.builder.queueUrl(queueUrl)
+          .receiptHandle(receiptHandle)
+          .visibilityTimeout(0)
+          .build
+      )
+    }
 
     def send(body: String): SendMessageResponse = sqsClient.sendMessage(SendMessageRequest
       .builder.messageBody(body).queueUrl(queueUrl).build())
@@ -64,12 +73,12 @@ object TestUtils {
   }
 
   val port = 8002
-  val account = 1
   val inputQueueName = "test_input_queue"
   val outputQueueName = "test_output_queue"
-  val sqsApi = new SQSService(port)
-  val inputQueueUrl = s"http://localhost:$port/$account/$inputQueueName"
-  val outputQueueUrl = s"http://localhost:$port/$account/$outputQueueName"
+  val sqsApi: SQSRestServer = SQSRestServerBuilder.withPort(port).withAWSRegion(Region.EU_WEST_2.toString).start()
+
+  val inputQueueUrl = s"http://localhost:$port/queue/$inputQueueName"
+  val outputQueueUrl = s"http://localhost:$port/queue/$outputQueueName"
 
   val inputQueueHelper: QueueHelper = QueueHelper(inputQueueUrl)
   val outputQueueHelper: QueueHelper = QueueHelper(outputQueueUrl)

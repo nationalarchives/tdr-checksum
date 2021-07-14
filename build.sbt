@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   scalaLogging,
   logback,
   scalaTest % Test,
-  sqsMock % Test,
+  elasticMq % Test,
+  elasticMqSqs % Test,
   wiremock % Test
 )
 

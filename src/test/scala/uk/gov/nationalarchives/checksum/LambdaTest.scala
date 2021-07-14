@@ -13,7 +13,6 @@ import scala.util.Try
 class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterEach  {
 
   override def beforeAll(): Unit = {
-    sqsApi.start()
     outputQueueHelper.createQueue
     inputQueueHelper.createQueue
     wiremockKmsEndpoint.start()
@@ -62,7 +61,8 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   "The update method" should "return the receipt handle for a successful message" in {
     val event = createEvent("sqs_file_event")
     val response = new Lambda().process(event, null)
-    response.head should equal(receiptHandle(event.getRecords.get(0).getBody))
+    //Receipt handle for the same message is in the form <static_uuid>#<variable_uuid> so we need to check the first uuid
+    response.head.split("#")(0) should equal(inputQueueHelper.receive.head.receiptHandle().split("#")(0))
   }
 
   "The update method" should "throw an exception for a no key error" in {
