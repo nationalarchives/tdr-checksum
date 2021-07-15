@@ -27,7 +27,7 @@ object TestUtils {
   def receiptHandle(body: String): String = Base64.getEncoder.encodeToString(body.getBytes("UTF-8"))
 
   def urlEncodeFile(location: String): String = URLEncoder.encode(
-    fromResource(s"json/$location.json").filterNot(_.isWhitespace).mkString, Charset.defaultCharset()
+    fromResource(s"json/$location.json").filterNot(_.isWhitespace).mkString, "UTF-8"
   )
 
   def createEvent(locations: String*): SQSEvent = {
@@ -49,8 +49,8 @@ object TestUtils {
 
   def url(queueName: String) = s"http://localhost:8002/1/test_${queueName}_queue"
 
-  val outputQueue: String = URLEncoder.encode(url("output"), Charset.defaultCharset())
-  val inputQueue: String = URLEncoder.encode(url("input"), Charset.defaultCharset())
+  val outputQueue: String = URLEncoder.encode(url("output"), "UTF-8")
+  val inputQueue: String = URLEncoder.encode(url("input"), "UTF-8")
 
   def sendMessageXml(md5: String): Elem =
     <SendMessageResponse>
@@ -79,7 +79,7 @@ object TestUtils {
       decode[KMSRequest](request.getBodyAsString) match {
         case Left(err) => throw err
         case Right(req) =>
-          val charset = Charset.defaultCharset()
+          val charset = "UTF-8"
           val plainText = charset.newDecoder.decode(ByteBuffer.wrap(req.CiphertextBlob.getBytes(charset))).toString
           ResponseDefinitionBuilder
             .like(responseDefinition)
