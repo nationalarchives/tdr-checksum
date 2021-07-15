@@ -79,7 +79,7 @@ object TestUtils {
       decode[KMSRequest](request.getBodyAsString) match {
         case Left(err) => throw err
         case Right(req) =>
-          val charset = "UTF-8"
+          val charset = Charset.defaultCharset()
           val plainText = charset.newDecoder.decode(ByteBuffer.wrap(req.CiphertextBlob.getBytes(charset))).toString
           ResponseDefinitionBuilder
             .like(responseDefinition)
