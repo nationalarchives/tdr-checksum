@@ -31,11 +31,14 @@ object TestUtils {
       val body = fromResource(s"json/$location.json").mkString
       record.setBody(body)
       val sendResponse = inputQueueHelper.send(body)
-      val receiptHandle = inputQueueHelper.receive.filter(_.messageId() == sendResponse.messageId()).head.receiptHandle()
-      inputQueueHelper.changeMessageVisibility(receiptHandle)
-      record.setReceiptHandle(receiptHandle)
-
+      record.setMessageId(sendResponse.messageId())
       record
+    })
+    val inputQueueMessages = inputQueueHelper.receive
+
+    records.foreach(record => {
+      val receiptHandle = inputQueueMessages.filter(_.messageId() == record.getMessageId).head.receiptHandle()
+      record.setReceiptHandle(receiptHandle)
     })
 
     event.setRecords(records.asJava)
@@ -47,15 +50,6 @@ object TestUtils {
       .region(Region.EU_WEST_2)
       .endpointOverride(URI.create("http://localhost:8002"))
       .build()
-
-    def changeMessageVisibility(receiptHandle: String): ChangeMessageVisibilityResponse = {
-      sqsClient.changeMessageVisibility(
-        ChangeMessageVisibilityRequest.builder.queueUrl(queueUrl)
-          .receiptHandle(receiptHandle)
-          .visibilityTimeout(0)
-          .build
-      )
-    }
 
     def send(body: String): SendMessageResponse = sqsClient.sendMessage(SendMessageRequest
       .builder.messageBody(body).queueUrl(queueUrl).build())
