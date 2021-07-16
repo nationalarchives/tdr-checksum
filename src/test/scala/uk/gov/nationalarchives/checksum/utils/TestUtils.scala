@@ -67,6 +67,7 @@ object TestUtils {
       .build).messages.asScala.toList
 
     def createQueue: CreateQueueResponse = sqsClient.createQueue(CreateQueueRequest.builder.queueName(queueUrl.split("/")(4)).build())
+    def deleteQueue: DeleteQueueResponse = sqsClient.deleteQueue(DeleteQueueRequest.builder.queueUrl(queueUrl).build())
 
     def delete(msg: Message): DeleteMessageResponse = sqsClient.deleteMessage(DeleteMessageRequest
       .builder.queueUrl(queueUrl).receiptHandle(msg.receiptHandle()).build)

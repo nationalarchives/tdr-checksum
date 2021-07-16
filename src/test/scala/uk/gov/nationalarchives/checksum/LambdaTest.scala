@@ -13,8 +13,6 @@ import scala.util.Try
 class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterEach  {
 
   override def beforeAll(): Unit = {
-    outputQueueHelper.createQueue
-    inputQueueHelper.createQueue
     wiremockKmsEndpoint.start()
     wiremockKmsEndpoint.stubFor(post(urlEqualTo("/")))
   }
@@ -24,8 +22,13 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   override def beforeEach(): Unit = {
-    outputQueueHelper.receive.foreach(outputQueueHelper.delete)
-    inputQueueHelper.receive.foreach(inputQueueHelper.delete)
+    outputQueueHelper.createQueue
+    inputQueueHelper.createQueue
+  }
+
+  override def afterEach(): Unit = {
+    outputQueueHelper.deleteQueue
+    inputQueueHelper.deleteQueue
   }
 
   "The update method" should "put a message in the output queue if the message is successful " in {
