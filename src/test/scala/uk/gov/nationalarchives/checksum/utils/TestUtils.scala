@@ -21,7 +21,6 @@ import java.nio.charset.Charset
 import java.util
 import scala.io.Source.fromResource
 import scala.jdk.CollectionConverters._
-import java.util.HashMap
 
 object TestUtils {
 
@@ -60,7 +59,6 @@ object TestUtils {
       .builder
       .maxNumberOfMessages(10)
       .queueUrl(queueUrl)
-      .visibilityTimeout(0) //Remove this once the change visibility code is added to the lambda.
       .build).messages.asScala.toList
 
     val visibilityTimeoutAttributes = new util.HashMap[QueueAttributeName, String]()
@@ -69,7 +67,13 @@ object TestUtils {
     def createQueue: CreateQueueResponse = sqsClient.createQueue(
       CreateQueueRequest.builder.queueName(queueUrl.split("/")(4)).attributes(visibilityTimeoutAttributes).build()
     )
-    def deleteQueue: DeleteQueueResponse = sqsClient.deleteQueue(DeleteQueueRequest.builder.queueUrl(queueUrl).build())
+    def deleteQueue(): DeleteQueueResponse = sqsClient.deleteQueue(DeleteQueueRequest.builder.queueUrl(queueUrl).build())
+
+    def queueAttribute(attributeName: QueueAttributeName): String = sqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder().queueUrl(queueUrl).attributeNames(attributeName).build()
+    ).attributes().get(attributeName)
+
+    def nonVisibleMessageCount: Int = queueAttribute(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).toInt
 
     def delete(msg: Message): DeleteMessageResponse = sqsClient.deleteMessage(DeleteMessageRequest
       .builder.queueUrl(queueUrl).receiptHandle(msg.receiptHandle()).build)

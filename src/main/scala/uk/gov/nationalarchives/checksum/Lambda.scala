@@ -9,7 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.parser.decode
-import software.amazon.awssdk.services.sqs.model.{DeleteMessageResponse, SendMessageResponse}
+import software.amazon.awssdk.services.sqs.model.{ChangeMessageVisibilityResponse, DeleteMessageResponse, SendMessageResponse}
 import uk.gov.nationalarchives.aws.utils.Clients.{kms, sqs}
 import uk.gov.nationalarchives.aws.utils.{KMSUtils, SQSUtils}
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
@@ -29,6 +29,7 @@ class Lambda {
   )
   val deleteMessage: String => DeleteMessageResponse = sqsUtils.delete(lambdaConfig("sqs.queue.input"), _)
   val sendMessage: String => SendMessageResponse = sqsUtils.send(lambdaConfig("sqs.queue.output"), _)
+  val resetMessageVisibility: String => ChangeMessageVisibilityResponse = receiptHandle => sqsUtils.makeMessageVisible(lambdaConfig("sqs.queue.input"), receiptHandle)
 
   val logger: Logger = Logger[Lambda]
 
@@ -42,11 +43,17 @@ class Lambda {
   def process(event: SQSEvent, context: Context): List[String] = {
     val results = event.getRecords.asScala.toList
       .map(sqsMessage => {
-        for {
-          body <- decodeBody(sqsMessage)
+        val decodedBody = decodeBody(sqsMessage)
+        val receiptHandleOrError = for {
+          body <- decodedBody
           checksum <- ChecksumGenerator(lambdaConfig).generate(body.checksumFile)
           _ <- IO(sendMessage(AddFileMetadataInput("SHA256ServerSideChecksum", body.checksumFile.fileId, checksum).asJson.noSpaces))
         } yield body.receiptHandle
+
+        receiptHandleOrError.handleErrorWith(err => decodedBody.flatMap(body => {
+          resetMessageVisibility(body.receiptHandle)
+          IO.raiseError(err)
+        }))
       })
 
     val (failed, succeeded) = results.map(_.attempt).sequence.unsafeRunSync().partitionMap(identity)

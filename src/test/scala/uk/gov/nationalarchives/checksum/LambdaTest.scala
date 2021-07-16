@@ -27,8 +27,8 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   override def afterEach(): Unit = {
-    outputQueueHelper.deleteQueue
-    inputQueueHelper.deleteQueue
+    outputQueueHelper.deleteQueue()
+    inputQueueHelper.deleteQueue()
   }
 
   "The update method" should "put a message in the output queue if the message is successful " in {
@@ -48,24 +48,22 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   "The update method" should "put one message in the output queue, delete the successful message and leave the decoding error message" in {
     Try(new Lambda().process(createEvent("sqs_file_event", "sqs_file_invalid_json"), null))
     val outputMessages = outputQueueHelper.receive
-    val inputMessages = inputQueueHelper.receive
     outputMessages.size should equal(1)
-    inputMessages.size should equal(1)
+    inputQueueHelper.nonVisibleMessageCount should equal(1)
   }
 
   "The update method" should "leave the queues unchanged if there are no successful messages" in {
     Try(new Lambda().process(createEvent("sqs_file_invalid_json"), null))
-    val outputMessages = outputQueueHelper.receive
-    val inputMessages = inputQueueHelper.receive
-    outputMessages.size should equal(0)
-    inputMessages.size should equal(1)
+    outputQueueHelper.nonVisibleMessageCount should equal(0)
+    inputQueueHelper.nonVisibleMessageCount should equal(1)
   }
 
   "The update method" should "return the receipt handle for a successful message" in {
     val event = createEvent("sqs_file_event")
+    val receiptHandle = event.getRecords.get(0).getReceiptHandle
     val response = new Lambda().process(event, null)
     //Receipt handle for the same message is in the form <static_uuid>#<variable_uuid> so we need to check the first uuid
-    response.head.split("#")(0) should equal(inputQueueHelper.receive.head.receiptHandle().split("#")(0))
+    response.head.split("#")(0) should equal(receiptHandle.split("#")(0))
   }
 
   "The update method" should "throw an exception for a no key error" in {
@@ -96,4 +94,13 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     metadata.value should equal("c08c59a10f61526ae02808f761d2fd75c09cb2d77d608dc01fdbc35e3fdaf11d")
   }
 
+  "The update method" should "leave an invalid json message in the input queue in a non visible state" in {
+    Try(new Lambda().process(createEvent("sqs_file_invalid_json"), null))
+    inputQueueHelper.nonVisibleMessageCount should equal(1)
+  }
+
+  "The update method" should "leave an file not found message in the input queue in a visible state" in {
+    Try(new Lambda().process(createEvent("sqs_file_no_key"), null))
+    inputQueueHelper.receive.size should equal(1)
+  }
 }
