@@ -18,8 +18,10 @@ import software.amazon.awssdk.services.sqs.model._
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import java.util
 import scala.io.Source.fromResource
 import scala.jdk.CollectionConverters._
+import java.util.HashMap
 
 object TestUtils {
 
@@ -58,10 +60,15 @@ object TestUtils {
       .builder
       .maxNumberOfMessages(10)
       .queueUrl(queueUrl)
-      .visibilityTimeout(0)
+      .visibilityTimeout(0) //Remove this once the change visibility code is added to the lambda.
       .build).messages.asScala.toList
 
-    def createQueue: CreateQueueResponse = sqsClient.createQueue(CreateQueueRequest.builder.queueName(queueUrl.split("/")(4)).build())
+    val visibilityTimeoutAttributes = new util.HashMap[QueueAttributeName, String]()
+    visibilityTimeoutAttributes.put(QueueAttributeName.VISIBILITY_TIMEOUT, (12 * 60 * 60).toString)
+
+    def createQueue: CreateQueueResponse = sqsClient.createQueue(
+      CreateQueueRequest.builder.queueName(queueUrl.split("/")(4)).attributes(visibilityTimeoutAttributes).build()
+    )
     def deleteQueue: DeleteQueueResponse = sqsClient.deleteQueue(DeleteQueueRequest.builder.queueUrl(queueUrl).build())
 
     def delete(msg: Message): DeleteMessageResponse = sqsClient.deleteMessage(DeleteMessageRequest
