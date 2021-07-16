@@ -58,6 +58,7 @@ object TestUtils {
       .builder
       .maxNumberOfMessages(10)
       .queueUrl(queueUrl)
+      .visibilityTimeout(0)
       .build).messages.asScala.toList
 
     def createQueue: CreateQueueResponse = sqsClient.createQueue(CreateQueueRequest.builder.queueName(queueUrl.split("/")(4)).build())
