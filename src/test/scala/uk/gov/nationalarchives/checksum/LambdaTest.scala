@@ -54,7 +54,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
 
   "The update method" should "leave the queues unchanged if there are no successful messages" in {
     Try(new Lambda().process(createEvent("sqs_file_invalid_json"), null))
-    outputQueueHelper.nonVisibleMessageCount should equal(0)
+    outputQueueHelper.receive.size should equal(0)
     inputQueueHelper.nonVisibleMessageCount should equal(1)
   }
 
@@ -99,7 +99,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     inputQueueHelper.nonVisibleMessageCount should equal(1)
   }
 
-  "The update method" should "leave an file not found message in the input queue in a visible state" in {
+  "The update method" should "make the message immediately available for retry" in {
     Try(new Lambda().process(createEvent("sqs_file_no_key"), null))
     inputQueueHelper.receive.size should equal(1)
   }
