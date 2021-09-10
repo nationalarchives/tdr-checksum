@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.1.0"
-  lazy val generatedGraphql = "uk.gov.nationalarchives" %% "tdr-generated-graphql" % "0.0.48"
+  lazy val generatedGraphql = "uk.gov.nationalarchives" %% "tdr-generated-graphql" % "0.0.142"
   lazy val typesafe = "com.typesafe" % "config" % "1.4.0"
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1"
   lazy val elasticMq = "org.elasticmq" %% "elasticmq-server" % "1.1.1"
