@@ -1,4 +1,4 @@
-library("tdr-jenkinslib")
+@Library("tdr-jenkinslib@add-release-to-github-step") _
 
 lambdaTests(
         // Hard-code stage, since it is arbitrary in the lambdaTests
