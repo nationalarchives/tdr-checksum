@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   catsEffect,
   scalaLogging,
   logback,
+  logstashLogbackEncoder,
   scalaTest % Test,
   elasticMq % Test,
   elasticMqSqs % Test,

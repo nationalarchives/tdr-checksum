@@ -15,5 +15,6 @@ object Dependencies {
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.2.0"
   lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
   lazy val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
+  lazy val logstashLogbackEncoder = "net.logstash.logback" % "logstash-logback-encoder" % "6.6"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "2.27.2"
 }
