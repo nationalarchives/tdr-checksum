@@ -15,7 +15,9 @@ import uk.gov.nationalarchives.aws.utils.{KMSUtils, SQSUtils}
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
 import graphql.codegen.types.AddFileMetadataInput
 import com.typesafe.scalalogging.Logger
+import net.logstash.logback.argument.StructuredArguments.value
 
+import java.time.Instant
 import scala.jdk.CollectionConverters._
 import scala.language.postfixOps
 
@@ -41,6 +43,7 @@ class Lambda {
   }
 
   def process(event: SQSEvent, context: Context): List[String] = {
+    val startTime = Instant.now
     val results = event.getRecords.asScala.toList
       .map(sqsMessage => {
         val decodedBody = decodeBody(sqsMessage)
@@ -48,7 +51,7 @@ class Lambda {
           body <- decodedBody
           checksum <- ChecksumGenerator(lambdaConfig).generate(body.checksumFile)
           _ <- IO(sendMessage(AddFileMetadataInput("SHA256ServerSideChecksum", body.checksumFile.fileId, checksum).asJson.noSpaces))
-        } yield body.receiptHandle
+        } yield body
 
         receiptHandleOrError.handleErrorWith(err => decodedBody.flatMap(body => {
           resetMessageVisibility(body.receiptHandle)
@@ -59,10 +62,20 @@ class Lambda {
     val (failed, succeeded) = results.map(_.attempt).sequence.unsafeRunSync().partitionMap(identity)
     if (failed.nonEmpty) {
       failed.foreach(e => logger.error(e.getMessage, e))
-      succeeded.map(deleteMessage)
+      succeeded.map(s => deleteMessage(s.receiptHandle))
       throw new RuntimeException(failed.mkString("\n"))
     } else {
-      succeeded
+      succeeded.map(success => {
+        val timeTaken = java.time.Duration.between(startTime, Instant.now).toMillis.toDouble / 1000
+        logger.info(
+          s"Lambda complete in {} seconds for file ID '{}' and consignment ID '{}'",
+          value("timeTaken", timeTaken),
+          value("fileId", success.checksumFile.fileId),
+          value("consignmentId", success.checksumFile.consignmentId)
+        )
+        success.receiptHandle
+      })
+
     }
   }
 }
