@@ -1,4 +1,4 @@
-name: TDR run lambda tests
+name: TDR Run Lambda Tests
 on:
   pull_request_target:
   push:
