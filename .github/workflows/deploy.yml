@@ -1,5 +1,6 @@
 name: TDR Deploy API
 on:
+  push:
   workflow_dispatch:
     inputs:
       environment:
