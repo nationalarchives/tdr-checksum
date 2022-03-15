@@ -2,7 +2,7 @@ name: TDR Tag and pre deploy
 on:
   push:
     branches:
-      - move-to-github-actions
+      - master
 jobs:
   pre-deploy:
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_build.yml@lambda-build
