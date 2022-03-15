@@ -8,6 +8,7 @@ jobs:
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_build.yml@lambda-build
     with:
       repo-name: tdr-checksum
+      artifact-name: checksum
       build-command: |
         sbt assembly
     secrets:
