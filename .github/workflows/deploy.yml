@@ -18,7 +18,7 @@ jobs:
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@lambda-build
     with:
       lambda-name: checksum
-      deployment-package: checksum
+      deployment-package: checksum.jar
       environment: ${{ github.event.inputs.environment }}
       to-deploy: ${{ github.event.inputs.to-deploy }}
     secrets:
