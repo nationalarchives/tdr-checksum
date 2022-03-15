@@ -15,7 +15,7 @@ permissions:
   contents: write
 jobs:
   deploy:
-    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@lambda-build
     with:
       lambda-name: checksum
       deployment-package: checksum
