@@ -1,0 +1,20 @@
+name: TDR Deploy API
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'intg'
+      to-deploy:
+        description: 'Version to deploy'
+        required: true
+
+permissions:
+  id-token: write
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying"
