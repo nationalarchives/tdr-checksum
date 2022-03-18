@@ -26,9 +26,9 @@ libraryDependencies ++= Seq(
 
 resolvers += "TDR Releases" at "s3://tdr-releases-mgmt"
 
-assemblyMergeStrategy in assembly := {
+(assembly / assemblyMergeStrategy) := {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
 
-assemblyJarName in assembly := "checksum.jar"
+(assembly / assemblyJarName) := "checksum.jar"
