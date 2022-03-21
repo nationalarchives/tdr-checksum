@@ -13,7 +13,7 @@ object Dependencies {
   lazy val circeParser = "io.circe" %% "circe-parser" % "0.14.1"
   lazy val awsUtils =  "uk.gov.nationalarchives.aws.utils" %% "tdr-aws-utils" % "0.1.16"
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.5.4"
-  lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
+  lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   lazy val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
   lazy val logstashLogbackEncoder = "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "2.27.2"
