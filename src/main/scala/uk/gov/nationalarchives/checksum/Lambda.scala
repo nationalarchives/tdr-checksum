@@ -16,6 +16,7 @@ import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
 import graphql.codegen.types.AddFileMetadataInput
 import com.typesafe.scalalogging.Logger
 import net.logstash.logback.argument.StructuredArguments.value
+import cats.effect.unsafe.implicits.global
 
 import java.time.Instant
 import scala.jdk.CollectionConverters._
