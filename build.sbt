@@ -24,8 +24,6 @@ libraryDependencies ++= Seq(
   wiremock % Test
 )
 
-resolvers += "TDR Releases" at "s3://tdr-releases-mgmt"
-
 (assembly / assemblyMergeStrategy) := {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case _ => MergeStrategy.first
