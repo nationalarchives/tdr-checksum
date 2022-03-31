@@ -24,11 +24,12 @@ libraryDependencies ++= Seq(
   wiremock % Test
 )
 
-resolvers += "TDR Releases" at "s3://tdr-releases-mgmt"
-
 (assembly / assemblyMergeStrategy) := {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
 
 (assembly / assemblyJarName) := "checksum.jar"
+
+Test / fork := true
+Test / envVars := Map("AWS_ACCESS_KEY_ID" -> "test", "AWS_SECRET_ACCESS_KEY" -> "test")
