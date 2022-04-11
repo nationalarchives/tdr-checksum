@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.sqs.model.{ChangeMessageVisibilityRespons
 import uk.gov.nationalarchives.aws.utils.Clients.{kms, sqs}
 import uk.gov.nationalarchives.aws.utils.{KMSUtils, SQSUtils}
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumFile
-import graphql.codegen.types.AddFileMetadataInput
+import graphql.codegen.types.AddFileMetadataWithFileIdInput
 import com.typesafe.scalalogging.Logger
 import net.logstash.logback.argument.StructuredArguments.value
 import cats.effect.unsafe.implicits.global
@@ -51,7 +51,7 @@ class Lambda {
         val receiptHandleOrError = for {
           body <- decodedBody
           checksum <- ChecksumGenerator(lambdaConfig).generate(body.checksumFile)
-          _ <- IO(sendMessage(AddFileMetadataInput("SHA256ServerSideChecksum", body.checksumFile.fileId, checksum).asJson.noSpaces))
+          _ <- IO(sendMessage(AddFileMetadataWithFileIdInput("SHA256ServerSideChecksum", body.checksumFile.fileId, checksum).asJson.noSpaces))
         } yield body
 
         receiptHandleOrError.handleErrorWith(err => decodedBody.flatMap(body => {
