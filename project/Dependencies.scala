@@ -14,7 +14,7 @@ object Dependencies {
   lazy val awsUtils =  "uk.gov.nationalarchives" %% "tdr-aws-utils" % "0.1.53"
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.4.0"
   lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
-  lazy val logback = "ch.qos.logback" % "logback-classic" % "1.4.4"
+  lazy val logback = "ch.qos.logback" % "logback-classic" % "1.4.5"
   lazy val logstashLogbackEncoder = "net.logstash.logback" % "logstash-logback-encoder" % "7.2"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "2.27.2"
 }
