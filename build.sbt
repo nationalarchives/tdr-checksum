@@ -6,21 +6,13 @@ ThisBuild / organization := "uk.gov.nationalarchives"
 ThisBuild / organizationName := "checksum-calculator"
 
 libraryDependencies ++= Seq(
-  lambdaJavaCore,
-  lambdaJavaEvents,
-  awsUtils,
-  generatedGraphql,
   typesafe,
   circeCore,
   circeGeneric,
   circeParser,
   catsEffect,
-  scalaLogging,
-  logback,
-  logstashLogbackEncoder,
+  s3Utils,
   scalaTest % Test,
-  elasticMq % Test,
-  elasticMqSqs % Test,
   wiremock % Test
 )
 
