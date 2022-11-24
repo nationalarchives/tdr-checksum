@@ -1,9 +1,10 @@
 package uk.gov.nationalarchives.checksum
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import io.circe.parser.decode
 import io.circe.generic.auto._
+import io.circe.parser.decode
 import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumResult
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 object LambdaRunner extends App {
   val consignmentId = "907d547d-a9ed-45f3-b93c-055fc792a299"
@@ -15,7 +16,7 @@ object LambdaRunner extends App {
   val output = new ByteArrayOutputStream()
   new Lambda().process(baos, output)
   val result = decode[ChecksumResult](output.toByteArray.map(_.toChar).mkString).toOption.get
-  println(result.fileId)
-  println(result.checksum)
+  println(result.checksum.fileId)
+  println(result.checksum.sha256Checksum)
 }
 

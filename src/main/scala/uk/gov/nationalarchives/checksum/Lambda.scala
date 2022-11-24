@@ -8,7 +8,7 @@ import io.circe.Printer
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import uk.gov.nationalarchives.checksum.ChecksumGenerator.{ChecksumFile, ChecksumResult, getFilePath}
+import uk.gov.nationalarchives.checksum.ChecksumGenerator.{Checksum, ChecksumFile, ChecksumResult, getFilePath}
 import uk.gov.nationalarchives.aws.utils.s3.S3Clients._
 import uk.gov.nationalarchives.aws.utils.s3.S3Utils
 
@@ -31,7 +31,7 @@ class Lambda {
       _ <- s3Utils.downloadFiles(bucket, key(checksumFile), Paths.get(getFilePath(checksumFile)).some)
       checksum <- ChecksumGenerator().generate(checksumFile)
       output <- Resource.fromAutoCloseable(IO(output)).use(outputStream => {
-        outputStream.write(ChecksumResult(checksumFile.fileId, checksum).asJson.printWith(Printer.noSpaces).getBytes())
+        outputStream.write(ChecksumResult(Checksum(checksumFile.fileId, checksum)).asJson.printWith(Printer.noSpaces).getBytes())
         IO.unit
       })
     } yield output

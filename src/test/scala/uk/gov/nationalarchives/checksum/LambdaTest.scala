@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import io.circe.parser.decode
 import org.apache.commons.io.output.ByteArrayOutputStream
-import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumResult
+import uk.gov.nationalarchives.checksum.ChecksumGenerator.{Checksum, ChecksumResult}
 import io.circe.generic.auto._
 
 import java.io.{ByteArrayInputStream, File}
@@ -62,8 +62,8 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     val result = outputStream.toByteArray.map(_.toChar).mkString
     val decoded = decode[ChecksumResult](result).toOption
     decoded.isDefined should be(true)
-    decoded.get.checksum should equal(expectedChecksum)
-    decoded.get.fileId should equal(fileId)
+    decoded.get.checksum.sha256Checksum should equal(expectedChecksum)
+    decoded.get.checksum.fileId should equal(fileId)
   }
 
    "The process method" should "throw an exception if the file is not found in S3" in {
@@ -79,7 +79,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     val outputStream = new ByteArrayOutputStream()
     new Lambda().process(createEvent("file_event"), outputStream)
     val result = outputStream.toByteArray.map(_.toChar).mkString
-    decode[ChecksumResult](result).toOption.get.checksum should equal("be776ad8d02e9fa4c35484877b2d96753a847e8bfc59c917c2442f3746850fb5")
+    decode[ChecksumResult](result).toOption.get.checksum.sha256Checksum should equal("be776ad8d02e9fa4c35484877b2d96753a847e8bfc59c917c2442f3746850fb5")
   }
 
   "The update method" should "calculate the correct checksum for a file with two chunks" in {
@@ -87,6 +87,6 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     val outputStream = new ByteArrayOutputStream()
     new Lambda().process(createEvent("file_event_large_file"), outputStream)
     val result = outputStream.toByteArray.map(_.toChar).mkString
-    decode[ChecksumResult](result).toOption.get.checksum should equal("c08c59a10f61526ae02808f761d2fd75c09cb2d77d608dc01fdbc35e3fdaf11d")
+    decode[ChecksumResult](result).toOption.get.checksum.sha256Checksum should equal("c08c59a10f61526ae02808f761d2fd75c09cb2d77d608dc01fdbc35e3fdaf11d")
   }
 }

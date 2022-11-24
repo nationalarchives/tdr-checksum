@@ -30,7 +30,9 @@ class ChecksumGenerator(configFactory: Config) {
 object ChecksumGenerator {
   case class ChecksumFile(consignmentId: UUID, fileId: UUID, originalPath: String, userId: UUID)
 
-  case class ChecksumResult(fileId: UUID, checksum: String)
+  case class ChecksumResult(checksum: Checksum)
+
+  case class Checksum(fileId: UUID, sha256Checksum: String)
 
   val configFactory: Config = ConfigFactory.load
 
