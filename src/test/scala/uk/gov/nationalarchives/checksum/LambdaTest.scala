@@ -29,7 +29,6 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
   }
 
   override def beforeEach(): Unit = {
-    new File("./src/test/resources/testfiles/running-files/f0a73877-6057-4bbb-a1eb-7c7b73cab586").mkdirs()
     wiremockS3.resetAll()
   }
 

@@ -12,7 +12,7 @@ import uk.gov.nationalarchives.checksum.ChecksumGenerator.{Checksum, ChecksumFil
 import uk.gov.nationalarchives.aws.utils.s3.S3Clients._
 import uk.gov.nationalarchives.aws.utils.s3.S3Utils
 
-import java.io.{InputStream, OutputStream}
+import java.io.{File, InputStream, OutputStream}
 import java.nio.file.Paths
 import scala.io.Source
 import scala.language.postfixOps
@@ -28,7 +28,9 @@ class Lambda {
     val s3Utils = S3Utils(s3Async(configFactory.getString("s3.endpoint")))
     for {
       checksumFile <- IO.fromEither(decode[ChecksumFile](body))
-      _ <- s3Utils.downloadFiles(bucket, key(checksumFile), Paths.get(getFilePath(checksumFile)).some)
+      filePath <- IO(getFilePath(checksumFile))
+      _ <- IO(new File(filePath.split("/").dropRight(1).mkString("/")).mkdirs())
+      _ <- s3Utils.downloadFiles(bucket, key(checksumFile), Paths.get(filePath).some)
       checksum <- ChecksumGenerator().generate(checksumFile)
       output <- Resource.fromAutoCloseable(IO(output)).use(outputStream => {
         outputStream.write(ChecksumResult(Checksum(checksumFile.fileId, checksum)).asJson.printWith(Printer.noSpaces).getBytes())
