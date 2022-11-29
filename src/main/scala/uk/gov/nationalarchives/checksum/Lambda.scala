@@ -21,16 +21,24 @@ class Lambda {
   def key(checksumFile: ChecksumFile) = s"${checksumFile.userId}/${checksumFile.consignmentId}/${checksumFile.fileId}"
   val configFactory: Config = ConfigFactory.load
 
+  def download(checksumFile: ChecksumFile) = {
+    val bucket = configFactory.getString("s3.bucket")
+    val s3Utils = S3Utils(s3Async(configFactory.getString("s3.endpoint")))
+    val filePath = getFilePath(checksumFile)
+    if(new File(filePath).exists()) {
+      IO.unit
+    } else {
+      IO(new File(filePath.split("/").dropRight(1).mkString("/")).mkdirs()).flatMap(_ => {
+        s3Utils.downloadFiles(bucket, key(checksumFile), Paths.get(filePath).some)
+      })
+    }
+  }
+
   def process(input: InputStream, output: OutputStream): Unit = {
     val body = Source.fromInputStream(input).getLines().mkString
-    val bucket = configFactory.getString("s3.bucket")
-
-    val s3Utils = S3Utils(s3Async(configFactory.getString("s3.endpoint")))
     for {
       checksumFile <- IO.fromEither(decode[ChecksumFile](body))
-      filePath <- IO(getFilePath(checksumFile))
-      _ <- IO(new File(filePath.split("/").dropRight(1).mkString("/")).mkdirs())
-      _ <- s3Utils.downloadFiles(bucket, key(checksumFile), Paths.get(filePath).some)
+      _ <- download(checksumFile)
       checksum <- ChecksumGenerator().generate(checksumFile)
       output <- Resource.fromAutoCloseable(IO(output)).use(outputStream => {
         outputStream.write(ChecksumResult(Checksum(checksumFile.fileId, checksum)).asJson.printWith(Printer.noSpaces).getBytes())

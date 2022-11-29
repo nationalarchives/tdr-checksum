@@ -3,13 +3,13 @@ package uk.gov.nationalarchives.checksum
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, urlEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import io.circe.parser.decode
-import org.apache.commons.io.output.ByteArrayOutputStream
-import uk.gov.nationalarchives.checksum.ChecksumGenerator.{Checksum, ChecksumResult}
-import io.circe.generic.auto._
+import uk.gov.nationalarchives.checksum.ChecksumGenerator.ChecksumResult
 
 import java.io.{ByteArrayInputStream, File}
 import java.nio.file.{Files, Paths}
@@ -56,6 +56,23 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     val outputStream = new ByteArrayOutputStream()
     val expectedChecksum = "be776ad8d02e9fa4c35484877b2d96753a847e8bfc59c917c2442f3746850fb5"
     val fileId = UUID.fromString("acea5919-25a3-4c6b-8908-fa47cc77878f")
+    mockS3Response("ten_bytes")
+    new Lambda().process(createEvent("file_event"), outputStream)
+    val result = outputStream.toByteArray.map(_.toChar).mkString
+    val decoded = decode[ChecksumResult](result).toOption
+    decoded.isDefined should be(true)
+    decoded.get.checksum.sha256Checksum should equal(expectedChecksum)
+    decoded.get.checksum.fileId should equal(fileId)
+  }
+
+  "The process method" should "succeed if the file already exists" in {
+    val outputStream = new ByteArrayOutputStream()
+    val expectedChecksum = "be776ad8d02e9fa4c35484877b2d96753a847e8bfc59c917c2442f3746850fb5"
+    val fileId = UUID.fromString("acea5919-25a3-4c6b-8908-fa47cc77878f")
+    val basePath = "./src/test/resources/testfiles/running-files/f0a73877-6057-4bbb-a1eb-7c7b73cab586/"
+    val filePath = s"$basePath/ten_bytes"
+    new File(basePath).mkdirs()
+    Files.copy(Paths.get("./src/test/resources/testfiles/f0a73877-6057-4bbb-a1eb-7c7b73cab586/ten_bytes"), Paths.get(filePath))
     mockS3Response("ten_bytes")
     new Lambda().process(createEvent("file_event"), outputStream)
     val result = outputStream.toByteArray.map(_.toChar).mkString
