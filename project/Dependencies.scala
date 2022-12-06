@@ -6,7 +6,7 @@ object Dependencies {
   lazy val circeCore = "io.circe" %% "circe-core" % "0.14.3"
   lazy val circeGeneric = "io.circe" %% "circe-generic" % "0.14.3"
   lazy val circeParser = "io.circe" %% "circe-parser" % "0.14.3"
-  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.4.1"
-  lazy val s3Utils = "uk.gov.nationalarchives" %% "s3-utils" % "0.1.55"
+  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.4.2"
+  lazy val s3Utils = "uk.gov.nationalarchives" %% "s3-utils" % "0.1.56"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "2.27.2"
 }
