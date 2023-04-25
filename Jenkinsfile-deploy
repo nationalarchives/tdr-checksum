@@ -1,8 +1,0 @@
-library("tdr-jenkinslib")
-
-deployToLambda(
-        stage: params.STAGE,
-        libraryName: "checksum",
-        version: params.TO_DEPLOY,
-        deploymentPackageName: "checksum.jar"
-)
