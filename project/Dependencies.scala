@@ -9,5 +9,4 @@ object Dependencies {
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.5.1"
   lazy val s3Utils = "uk.gov.nationalarchives" %% "s3-utils" % "0.1.98"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "3.0.0"  
-  lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "2.27.2"
 }
