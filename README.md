@@ -13,3 +13,5 @@ In the [LambdaRunner](src/main/scala/uk/gov/nationalarchives/checksum/LambdaRunn
 The default environment variables are set for a chunk size of 100Mb and the integration S3 bucket but these can be changed by overriding `CHUNK_SIZE_IN_MB` and `S3_BUCKET`
 
 Run the `LambdaRunner` class.
+
+Test test test
