@@ -1,5 +1,5 @@
 name: TDR Tag and pre deploy
-on: 
+on:
   push:
     branches:
       - master
