@@ -87,7 +87,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
     val exception = intercept[RuntimeException] {
       new Lambda().process(event, null)
     }
-    exception.getMessage should equal("software.amazon.awssdk.services.s3.model.S3Exception: null (Service: S3, Status Code: 404, Request ID: null)")
+    exception.getMessage should equal("software.amazon.awssdk.services.s3.model.S3Exception: (Service: S3, Status Code: 404, Request ID: null) (SDK Attempt Count: 1)")
   }
 
   "The update method" should "calculate the correct checksum for a file with one chunk" in {
