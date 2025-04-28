@@ -28,7 +28,7 @@ class ChecksumGenerator(configFactory: Config) {
 }
 
 object ChecksumGenerator {
-  case class ChecksumFile(consignmentId: UUID, fileId: UUID, originalPath: String, userId: UUID, s3SourceBucket: Option[String] = None)
+  case class ChecksumFile(consignmentId: UUID, fileId: UUID, originalPath: String, userId: UUID, s3SourceBucket: Option[String] = None, s3ObjectKey: Option[String] = None)
 
   case class ChecksumResult(checksum: Checksum)
 

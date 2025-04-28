@@ -19,24 +19,26 @@ import scala.language.postfixOps
 
 class Lambda {
   val configFactory: Config = ConfigFactory.load
-  private val cleanBucket = configFactory.getString("s3.cleanBucket")
   private val dirtyBucket = configFactory.getString("s3.bucket")
-  private case class S3Location(s3Bucket: String, s3ObjectKey: String)
 
-  private def s3Location(checksumFile: ChecksumFile): S3Location = checksumFile.s3SourceBucket match {
-    case Some(v) if v == cleanBucket => S3Location(v, s"${checksumFile.consignmentId}/${checksumFile.fileId}")
-    case _ => S3Location(dirtyBucket, s"${checksumFile.userId}/${checksumFile.consignmentId}/${checksumFile.fileId}")
+  def s3Bucket(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucket match {
+    case Some(v) => v
+    case _ => dirtyBucket
+  }
+
+  def s3ObjectKey(checksumFile: ChecksumFile): String = checksumFile.s3ObjectKey match {
+    case Some(v) => v
+    case _ => s"${checksumFile.userId}/${checksumFile.consignmentId}/${checksumFile.fileId}"
   }
 
   private def download(checksumFile: ChecksumFile): IO[Any] = {
-    val s3 = s3Location(checksumFile)
     val s3Utils = S3Utils(s3Async(configFactory.getString("s3.endpoint")))
     val filePath = getFilePath(checksumFile)
     if(new File(filePath).exists()) {
       IO.unit
     } else {
       IO(new File(filePath.split("/").dropRight(1).mkString("/")).mkdirs()).flatMap(_ => {
-        s3Utils.downloadFiles(s3.s3Bucket, s3.s3ObjectKey, Paths.get(filePath).some)
+        s3Utils.downloadFiles(s3Bucket(checksumFile), s3ObjectKey(checksumFile), Paths.get(filePath).some)
       })
     }
   }
