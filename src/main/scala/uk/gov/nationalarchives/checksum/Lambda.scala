@@ -26,7 +26,7 @@ class Lambda {
     case _ => dirtyBucket
   }
 
-  def s3ObjectKey(checksumFile: ChecksumFile): String = checksumFile.s3ObjectKey match {
+  def s3ObjectKey(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucketKey match {
     case Some(v) => v
     case _ => s"${checksumFile.userId}/${checksumFile.consignmentId}/${checksumFile.fileId}"
   }
