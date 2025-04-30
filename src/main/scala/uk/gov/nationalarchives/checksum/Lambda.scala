@@ -19,14 +19,14 @@ import scala.language.postfixOps
 
 class Lambda {
   val configFactory: Config = ConfigFactory.load
-  private val dirtyBucket = configFactory.getString("s3.bucket")
+  private val defaultBucket = configFactory.getString("s3.bucket")
 
-  def s3Bucket(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucket match {
+  private def s3BucketOverride(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucket match {
     case Some(v) => v
-    case _ => dirtyBucket
+    case _ => defaultBucket
   }
 
-  def s3ObjectKey(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucketKey match {
+  private def s3ObjectKeyOverride(checksumFile: ChecksumFile): String = checksumFile.s3SourceBucketKey match {
     case Some(v) => v
     case _ => s"${checksumFile.userId}/${checksumFile.consignmentId}/${checksumFile.fileId}"
   }
@@ -38,7 +38,7 @@ class Lambda {
       IO.unit
     } else {
       IO(new File(filePath.split("/").dropRight(1).mkString("/")).mkdirs()).flatMap(_ => {
-        s3Utils.downloadFiles(s3Bucket(checksumFile), s3ObjectKey(checksumFile), Paths.get(filePath).some)
+        s3Utils.downloadFiles(s3BucketOverride(checksumFile), s3ObjectKeyOverride(checksumFile), Paths.get(filePath).some)
       })
     }
   }
