@@ -45,13 +45,16 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterAll with BeforeAndAfterE
 
   def mockS3Response(fileName: String, key: Option[String] = None): StubMapping = {
     val urlStub = key match {
-      case Some(v) => s"/$v"
-      case _ => s"/bd4cbe2e-b752-4432-8aec-a3234b9d4339/$consignmentId/$fileId"
+      case Some(v) => s"/$v?partNumber=1"
+      case _ => s"/bd4cbe2e-b752-4432-8aec-a3234b9d4339/$consignmentId/$fileId?partNumber=1"
     }
     val filePath = getClass.getResource(s"/testfiles/$consignmentId/$fileName").getFile
     val bytes = Files.readAllBytes(Paths.get(filePath))
+
     wiremockS3.stubFor(get(urlEqualTo(urlStub))
-      .willReturn(aResponse().withStatus(200).withBody(bytes))
+      .willReturn(aResponse().withStatus(200)
+        .withBody(bytes)
+        .withHeader("Content-Length", s"${bytes.size}"))
     )
   }
 
