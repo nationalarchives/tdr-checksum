@@ -16,12 +16,13 @@ on:
         required: true
 
 run-name: Deploying Checksum Lambda ${{inputs.to-deploy}} to ${{inputs.environment}}
-permissions:
-  id-token: write
-  contents: write
+permissions: {}
 jobs:
   deploy:
-    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@4cce7fa069b9dbecddbdacd9350f66adc50ac815 # v0.0.22
+    permissions:
+      id-token: write
+      contents: write
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@e7b57a3bdf7863c951cd203101c6d566986376e3 # v0.0.38
     with:
       lambda-name: checksum-v2
       deployment-package: checksum.jar
